@@ -1,10 +1,10 @@
 package foo
 
-import zio.dynamodb.*
-import zio.dynamodb.DynamoDBQuery.*
+import zio.dynamodb._
+import zio.dynamodb.DynamoDBQuery._
 import foo.model.{ Address, Payment, Student }
-import foo.model.Student.*
-import foo.DynamoDB.*
+import foo.model.Student.schema
+import foo.DynamoDB._
 import zio.stream.ZStream
 import zio.{ Console, ZIOAppDefault }
 
@@ -15,51 +15,51 @@ import java.time.Instant
  */
 object StudentZioDynamoDbExampleWithOptics extends ZIOAppDefault {
 
-  val enrollmentDateTyped: ProjectionExpression[Student, Option[Instant]] = enrollmentDate
+  val enrollmentDateTyped: ProjectionExpression[Student, Option[Instant]] = Student.enrollmentDate
 
   private val program = for {
     _ <- createTable("student", KeySchema("email", "subject"), BillingMode.PayPerRequest)(
            AttributeDefinition.attrDefnString("email"),
            AttributeDefinition.attrDefnString("subject")
          ).execute
-    _ <- batchWriteFromStream(ZStream(avi, adam)) { student =>
+    _ <- batchWriteFromStream(ZStream(Student.avi, Student.adam)) { student =>
            put("student", student)
          }.runDrain
-    _ <- put("student", avi.copy(payment = Payment.CreditCard)).execute
-    _ <- batchReadFromStream("student", ZStream(avi, adam))(s => primaryKey(s.email, s.subject))
+    _ <- put("student", Student.avi.copy(payment = Payment.CreditCard)).execute
+    _ <- batchReadFromStream("student", ZStream(Student.avi, Student.adam))(s => Student.primaryKey(s.email, s.subject))
            .tap(pair => Console.printLine(s"student=${pair._2}"))
            .runDrain
     _ <- scanAll[Student]("student").filter {
-           enrollmentDate === Some(
-             enrolDate
-           ) && payment === Payment.CreditCard
+           Student.enrollmentDate === Some(
+             Student.enrolDate
+           ) && Student.payment === Payment.CreditCard
          }.execute
            .map(_.runCollect)
     _ <- queryAll[Student]("student")
            .filter(
-             enrollmentDate === Some(enrolDate) && payment === Payment.CreditCard
+             Student.enrollmentDate === Some(Student.enrolDate) && Student.payment === Payment.CreditCard
            )
-           .whereKey(email === "avi@gmail.com" && subject === "maths")
+           .whereKey(Student.email === "avi@gmail.com" && Student.subject === "maths")
            .execute
            .map(_.runCollect)
-    _ <- put[Student]("student", avi)
+    _ <- put[Student]("student", Student.avi)
            .where(
-             enrollmentDate === Some(
-               enrolDate
-             ) && email === "avi@gmail.com" && payment === Payment.CreditCard
+             Student.enrollmentDate === Some(
+               Student.enrolDate
+             ) && Student.email === "avi@gmail.com" && Student.payment === Payment.CreditCard
            )
            .execute
-    _ <- update[Student]("student", primaryKey("avi@gmail.com", "maths")) {
-           enrollmentDate.set(Some(enrolDate2)) + payment.set(Payment.PayPal) + address
+    _ <- update[Student]("student", Student.primaryKey("avi@gmail.com", "maths")) {
+           Student.enrollmentDate.set(Some(Student.enrolDate2)) + Student.payment.set(Payment.PayPal) + Student.address
              .set(
                Some(Address("line1", "postcode1"))
              )
          }.execute
-    _ <- delete("student", primaryKey("adam@gmail.com", "english"))
+    _ <- delete("student", Student.primaryKey("adam@gmail.com", "english"))
            .where(
-             enrollmentDate === Some(
-               enrolDate
-             ) && payment === Payment.CreditCard
+             Student.enrollmentDate === Some(
+               Student.enrolDate
+             ) && Student.payment === Payment.CreditCard
            )
            .execute
     _ <- scanAll[Student]("student").execute
