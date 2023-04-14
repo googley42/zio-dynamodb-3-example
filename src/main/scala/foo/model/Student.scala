@@ -7,26 +7,6 @@ import zio.schema.DeriveSchema
 import java.time.Instant
 import zio.schema.Schema
 
-@enumOfCaseObjects
-sealed trait Payment
-
-object Payment {
-  case object DebitCard extends Payment
-
-  case object CreditCard extends Payment
-
-  case object PayPal extends Payment
-
-  implicit val schema: Schema.Enum3[DebitCard.type, CreditCard.type, PayPal.type, Payment] = DeriveSchema.gen[Payment]
-}
-
-final case class Address(addr1: String, postcode: String)
-
-object Address {
-  implicit val schema: Schema.CaseClass2[String, String, Address] =
-    DeriveSchema.gen[Address]
-}
-
 final case class Student(
   email: String,
   subject: String,

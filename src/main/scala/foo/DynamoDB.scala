@@ -9,21 +9,20 @@ import zio.aws.{ dynamodb, netty }
 import zio.dynamodb.DynamoDBExecutor
 
 import java.net.URI
+import zio.ULayer
+import zio.aws.core.config.CommonAwsConfig
+import zio.aws.core.config.AwsConfig
+import zio.aws.core.httpclient.HttpClient
 
 object DynamoDB {
-  private val awsConfig = ZLayer.succeed(
-    config.CommonAwsConfig(
-      region = None,
-      credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy")),
-      endpointOverride = None,
-      commonClientConfig = None
-    )
-  )
 
   val dynamoDbLayer: ZLayer[Any, Throwable, DynamoDb] =
-    (netty.NettyHttpClient.default ++ awsConfig) >>> config.AwsConfig.default >>> dynamodb.DynamoDb.customized {
-      builder =>
+    ZLayer.make[DynamoDb](
+      netty.NettyHttpClient.default,
+      config.AwsConfig.default,
+      dynamodb.DynamoDb.customized { builder =>
         builder.endpointOverride(URI.create("http://localhost:8000")).region(Region.US_EAST_1)
-    }
+      }
+    )
 
 }
