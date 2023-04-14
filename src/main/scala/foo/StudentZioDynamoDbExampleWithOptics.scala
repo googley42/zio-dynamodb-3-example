@@ -4,7 +4,7 @@ import zio.dynamodb._
 import zio.dynamodb.DynamoDBQuery._
 import foo.model.{ Address, Payment, Student }
 import foo.model.Student.schema
-import foo.DynamoDB._
+import foo.DynamoDB.dynamoDbLayer
 import zio.stream.ZStream
 import zio.{ Console, ZIOAppDefault }
 
