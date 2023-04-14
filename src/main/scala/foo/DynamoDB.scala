@@ -1,11 +1,11 @@
 package foo
 
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
 import software.amazon.awssdk.regions.Region
 import zio.ZLayer
 import zio.aws.core.config
 import zio.aws.dynamodb.DynamoDb
-import zio.aws.{dynamodb, netty}
+import zio.aws.{ dynamodb, netty }
 import zio.dynamodb.DynamoDBExecutor
 
 import java.net.URI

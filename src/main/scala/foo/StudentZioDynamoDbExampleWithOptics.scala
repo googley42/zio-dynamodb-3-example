@@ -2,11 +2,11 @@ package foo
 
 import zio.dynamodb.*
 import zio.dynamodb.DynamoDBQuery.*
-import foo.model.Student
-import foo.model.Student._
-import foo.DynamoDB._
+import foo.model.{ Address, Payment, Student }
+import foo.model.Student.*
+import foo.DynamoDB.*
 import zio.stream.ZStream
-import zio.{Console, ZIOAppDefault}
+import zio.{ Console, ZIOAppDefault }
 
 import java.time.Instant
 
@@ -25,19 +25,19 @@ object StudentZioDynamoDbExampleWithOptics extends ZIOAppDefault {
     _ <- batchWriteFromStream(ZStream(avi, adam)) { student =>
            put("student", student)
          }.runDrain
-    _ <- put("student", avi.copy(payment = foo.model.Payment.CreditCard)).execute
+    _ <- put("student", avi.copy(payment = Payment.CreditCard)).execute
     _ <- batchReadFromStream("student", ZStream(avi, adam))(s => primaryKey(s.email, s.subject))
            .tap(pair => Console.printLine(s"student=${pair._2}"))
            .runDrain
     _ <- scanAll[Student]("student").filter {
            enrollmentDate === Some(
              enrolDate
-           ) && payment === foo.model.Payment.CreditCard
+           ) && payment === Payment.CreditCard
          }.execute
            .map(_.runCollect)
     _ <- queryAll[Student]("student")
            .filter(
-             enrollmentDate === Some(enrolDate) && payment === foo.model.Payment.CreditCard
+             enrollmentDate === Some(enrolDate) && payment === Payment.CreditCard
            )
            .whereKey(email === "avi@gmail.com" && subject === "maths")
            .execute
@@ -46,20 +46,20 @@ object StudentZioDynamoDbExampleWithOptics extends ZIOAppDefault {
            .where(
              enrollmentDate === Some(
                enrolDate
-             ) && email === "avi@gmail.com" && payment === foo.model.Payment.CreditCard
+             ) && email === "avi@gmail.com" && payment === Payment.CreditCard
            )
            .execute
     _ <- update[Student]("student", primaryKey("avi@gmail.com", "maths")) {
-           enrollmentDate.set(Some(enrolDate2)) + payment.set(foo.model.Payment.PayPal) + address
+           enrollmentDate.set(Some(enrolDate2)) + payment.set(Payment.PayPal) + address
              .set(
-               Some(foo.model.Address("line1", "postcode1"))
+               Some(Address("line1", "postcode1"))
              )
          }.execute
     _ <- delete("student", primaryKey("adam@gmail.com", "english"))
            .where(
              enrollmentDate === Some(
                enrolDate
-             ) && payment === foo.model.Payment.CreditCard // && zio.dynamodb.examples.Elephant.email === "elephant@gmail.com"
+             ) && payment === Payment.CreditCard
            )
            .execute
     _ <- scanAll[Student]("student").execute
