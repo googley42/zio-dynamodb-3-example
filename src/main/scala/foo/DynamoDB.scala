@@ -11,7 +11,7 @@ import zio.dynamodb.DynamoDBExecutor
 import java.net.URI
 
 object DynamoDB {
-  val awsConfig = ZLayer.succeed(
+  private val awsConfig = ZLayer.succeed(
     config.CommonAwsConfig(
       region = None,
       credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy")),
@@ -26,5 +26,4 @@ object DynamoDB {
         builder.endpointOverride(URI.create("http://localhost:8000")).region(Region.US_EAST_1)
     }
 
-  val layer = dynamoDbLayer >>> DynamoDBExecutor.live
 }
