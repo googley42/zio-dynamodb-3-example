@@ -11,6 +11,6 @@ lazy val root = (project in file("."))
     name := "zio-dynamodb-3-example",
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio"          % zioVersion,
-      "dev.zio" %% "zio-dynamodb" % "0.2.9+12-b984b805-SNAPSHOT"
+      "dev.zio" %% "zio-dynamodb" % "0.2.9+14-30eafda8-SNAPSHOT"
     )
   )
