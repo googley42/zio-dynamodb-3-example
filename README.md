@@ -17,5 +17,5 @@ docker-compose -f docker/docker-compose.yml down
 ## Usage
 
 ```bash
-sbt runMain foo.StudentZioDynamoDbExampleWithOptics
+sbt "runMain foo.StudentZioDynamoDbExampleWithOptics"
 ```
