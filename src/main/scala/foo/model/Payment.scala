@@ -1,10 +1,8 @@
 package foo.model
 
-import zio.dynamodb.Annotations.enumOfCaseObjects
 import zio.schema.Schema
 import zio.schema.DeriveSchema
 
-@enumOfCaseObjects
 sealed trait Payment
 
 object Payment {
