@@ -17,7 +17,7 @@ object StudentZioDynamoDbExampleWithOptics extends ZIOAppDefault:
   val enrollmentDateTyped: ProjectionExpression[Student, Option[Instant]] =
     Student.enrollmentDate
 
-  private val program = for {
+  private val program = for
     _ <- createTable(
       "student",
       KeySchema("email", "subject"),
@@ -84,6 +84,6 @@ object StudentZioDynamoDbExampleWithOptics extends ZIOAppDefault:
         ).runDrain
       )
     _ <- deleteTable("student").execute
-  } yield ()
+  yield ()
 
   override def run = program.provide(dynamoDbLayer, DynamoDBExecutor.live)
