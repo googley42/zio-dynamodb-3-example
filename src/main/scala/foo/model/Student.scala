@@ -1,27 +1,28 @@
 package foo.model
 
-import zio.dynamodb.Annotations.enumOfCaseObjects
-import zio.dynamodb.{ PrimaryKey, ProjectionExpression }
+import zio.dynamodb.{PrimaryKey, ProjectionExpression}
 import zio.schema.DeriveSchema
 
 import java.time.Instant
 import zio.schema.Schema
+import zio.dynamodb.KeyConditionExpr.PrimaryKeyExpr
+import zio.dynamodb.KeyConditionExpr
 
 final case class Student(
-  email: String,
-  subject: String,
-  enrollmentDate: Option[Instant],
-  payment: Payment,
-  altPayment: Payment,
-  studentNumber: Int,
-  collegeName: String,
-  address: Option[Address] = None,
-  addresses: List[Address] = List.empty[Address],
-  groups: Set[String] = Set.empty[String],
-  version: Int = 0
+    email: String,
+    subject: String,
+    enrollmentDate: Option[Instant],
+    payment: Payment,
+    altPayment: Payment,
+    studentNumber: Int,
+    collegeName: String,
+    address: Option[Address] = None,
+    addresses: List[Address] = List.empty[Address],
+    groups: Set[String] = Set.empty[String],
+    version: Int = 0
 )
 
-object Student {
+object Student:
   implicit val schema: Schema.CaseClass11[
     String,
     String,
@@ -51,12 +52,13 @@ object Student {
   ) =
     ProjectionExpression.accessors[Student]
 
-  def primaryKey(email: String, subject: String): PrimaryKey = PrimaryKey("email" -> email, "subject" -> subject)
+  def primaryKey(email: String, subject: String): PrimaryKeyExpr[Student] =
+    Student.email.partitionKey === email && Student.subject.sortKey === subject
 
-  val enrolDate  = Instant.parse("2021-03-20T01:39:33Z")
+  val enrolDate = Instant.parse("2021-03-20T01:39:33Z")
   val enrolDate2 = Instant.parse("2022-03-20T01:39:33Z")
 
-  val avi  = Student(
+  val avi = Student(
     "avi@gmail.com",
     "maths",
     Some(enrolDate),
@@ -83,5 +85,3 @@ object Student {
       "group2"
     )
   )
-
-}
