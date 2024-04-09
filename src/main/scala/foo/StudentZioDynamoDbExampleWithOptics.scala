@@ -12,7 +12,7 @@ import java.time.Instant
 
 /** Type safe API example
   */
-object StudentZioDynamoDbExampleWithOptics extends ZIOAppDefault {
+object StudentZioDynamoDbExampleWithOptics extends ZIOAppDefault:
 
   val enrollmentDateTyped: ProjectionExpression[Student, Option[Instant]] =
     Student.enrollmentDate
@@ -87,4 +87,3 @@ object StudentZioDynamoDbExampleWithOptics extends ZIOAppDefault {
   } yield ()
 
   override def run = program.provide(dynamoDbLayer, DynamoDBExecutor.live)
-}

@@ -22,7 +22,7 @@ final case class Student(
     version: Int = 0
 )
 
-object Student {
+object Student:
   implicit val schema: Schema.CaseClass11[
     String,
     String,
@@ -85,5 +85,3 @@ object Student {
       "group2"
     )
   )
-
-}

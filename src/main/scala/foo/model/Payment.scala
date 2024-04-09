@@ -5,7 +5,7 @@ import zio.schema.DeriveSchema
 
 sealed trait Payment
 
-object Payment {
+object Payment:
   case object DebitCard extends Payment
 
   case object CreditCard extends Payment
@@ -13,4 +13,4 @@ object Payment {
   case object PayPal extends Payment
 
   implicit val schema: Schema.Enum3[DebitCard.type, CreditCard.type, PayPal.type, Payment] = DeriveSchema.gen[Payment]
-}
+
