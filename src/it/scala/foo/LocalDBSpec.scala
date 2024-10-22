@@ -10,6 +10,7 @@ import zio.dynamodb.PrimaryKey
 import zio.schema.annotation.caseName
 import zio.schema.annotation.discriminatorName
 import zio.test.TestAspect
+import zio.dynamodb.Item
 
 object LocalDBSpec extends DynamoDBLocalSpec {
   def spec = suite("DynamoDB local suite")(
@@ -35,29 +36,36 @@ object LocalDBSpec extends DynamoDBLocalSpec {
       @discriminatorName("animalType")
       sealed trait Animal
       object Animal {
-        // compiler macro error "Deriving schema for Animal is not supported"
-//        implicit val schema: Schema[Animal] = DeriveSchema.gen[Animal]
-      }
-      @caseName("the_dog")
-      final case class Dog(id: String, name: String) extends Animal
-      object Dog {
-        implicit val schema: Schema.CaseClass2[String, String, Dog] =
-          DeriveSchema.gen[Dog]
-        val (id, name) = ProjectionExpression.accessors[Dog]
-      }
-      final case class Cat(id: String, name: String) extends Animal
-      object Cat {
-        implicit val schema: Schema.CaseClass2[String, String, Cat] =
-          DeriveSchema.gen[Cat]
-        val (id, name) = ProjectionExpression.accessors[Cat]
+        @caseName("the_dog")
+        final case class Dog(id: String, name: String) extends Animal
+        object Dog {
+          implicit val schema: Schema.CaseClass2[String, String, Dog] =
+            DeriveSchema.gen[Dog]
+          val (id, name) = ProjectionExpression.accessors[Dog]
+        }
+        final case class Cat(id: String, name: String) extends Animal
+        object Cat {
+          implicit val schema: Schema.CaseClass2[String, String, Cat] =
+            DeriveSchema.gen[Cat]
+          val (id, name) = ProjectionExpression.accessors[Cat]
+        }
+        implicit val schema: Schema.Enum2[Dog, Cat, Animal] =
+          DeriveSchema.gen[Animal]
+        val (dog, cat) = ProjectionExpression.accessors[Animal]
       }
 
       withSingleIdKeyTable(tableName =>
         for {
-          _ <- DynamoDBQuery.put(tableName, Dog("1", "John")).execute
+          // when we do a put of a sealed trait, we need to specify the trait type otherwise the discriminator is not set
+          _ <- DynamoDBQuery
+            .put[Animal](tableName, Animal.Dog("1", "John"))
+            .execute
           x <- DynamoDBQuery.getItem(tableName, PrimaryKey("id" -> "1")).execute
-          _ = println(s"XXXXXXXXXXXX $x")
-        } yield assertTrue(1 == 1)
+        } yield assertTrue(
+          x == Some(
+            Item("id" -> "1", "animalType" -> "the_dog", "name" -> "John")
+          )
+        )
       )
     }
   ) @@ TestAspect.nondeterministic
