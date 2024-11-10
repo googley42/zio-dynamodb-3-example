@@ -23,7 +23,7 @@ final case class Student(
 )
 
 object Student:
-  implicit val schema: Schema.CaseClass11[
+  given schema: Schema.CaseClass11[
     String,
     String,
     Option[Instant],
